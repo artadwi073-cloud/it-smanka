@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kuis Bencana Alam</title>
+
+<style>
+    body {
+        background: #081020;
+        color: white;
+        font-family: Arial, sans-serif;
+        text-align: center;
+        padding: 25px;
+    }
+
+    h1 {
+        font-size: 32px;
+        text-shadow: 0 0 10px #00eaff;
+    }
+
+    .menu button {
+        display: block;
+        width: 90%;
+        margin: 12px auto;
+        padding: 15px;
+        background: #112244;
+        color: white;
+        border: 2px solid #00eaff;
+        border-radius: 12px;
+        font-size: 18px;
+        transition: 0.3s;
+    }
+
+    .menu button:hover {
+        background: #00eaff;
+        color: black;
+    }
+
+    #quizBox {
+        display: none;
+        border: 2px solid #00eaff;
+        margin-top: 20px;
+        border-radius: 12px;
+        padding: 20px;
+    }
+
+    .btn {
+        background: #112244;
+        border: 2px solid #00eaff;
+        padding: 12px;
+        border-radius: 12px;
+        width: 90%;
+        margin: 10px auto;
+        color: white;
+        transition: 0.3s;
+    }
+
+    .btn:hover {
+        background: #00eaff;
+        color: black;
+    }
+
+    footer {
+        margin-top: 35px;
+        opacity: 0.7;
+    }
+</style>
+</head>
+
+<body>
+
+<h1>Simulasi & Kuis Bencana Alam</h1>
+
+<div class="menu">
+    <button onclick="startQuiz('gempa')">🌀 Gempa Bumi</button>
+    <button onclick="startQuiz('banjir')">🌊 Banjir</button>
+    <button onclick="startQuiz('kebakaran')">🔥 Kebakaran</button>
+</div>
+
+<div id="quizBox">
+    <h2 id="quizTitle"></h2>
+    <p id="questionText"></p>
+    <div id="options"></div>
+    <button class="btn" onclick="nextQuestion()">Lanjut</button>
+</div>
+
+<footer>ROBI & ARTA | SMAN KABUH JOMBANG | 2025</footer>
+
+<script>
+/* ====================
+   BANK SOAL 10 / BENCANA
+==================== */
+
+const questions = {
+
+    gempa: [
+        {q:"Saat gempa hal pertama yang harus dilakukan?", a:["Lari ke luar","Berlindung bawah meja","Dekat kaca"], c:1},
+        {q:"Posisi aman saat gempa?", a:["Duck, Cover, Hold","Berdiri","Dekat jendela"], c:0},
+        {q:"Jika sedang tidur dan gempa?", a:["Tetap di tempat & lindungi kepala","Lompat ke luar","Dekat lemari"], c:0},
+        {q:"Setelah gempa besar?", a:["Tetap di dalam","Evakuasi ke tempat aman","Dekat tiang listrik"], c:1},
+        {q:"Gempa disebabkan oleh…", a:["Pergerakan lempeng","Awan gelap","Angin"], c:0},
+        {q:"Saat gempa di sekolah kamu harus?", a:["Lari panik","Ikuti prosedur evakuasi","Dekat kaca"], c:1},
+        {q:"Jangan gunakan… saat gempa", a:["Lift","Tangga","Helm"], c:0},
+        {q:"Tempat berbahaya saat gempa?", a:["Lapangan terbuka","Dekat bangunan tinggi","Ruang luas"], c:1},
+        {q:"Setelah gempa, kamu harus?", a:["Cek kondisi sekitar","Tidur lagi","Abaikan"], c:0},
+        {q:"Jika terjadi gempa saat di mall?", a:["Mengikuti petunjuk evakuasi","Masuk lift","Dekat etalase kaca"], c:0}
+    ],
+
+    banjir: [
+        {q:"Saat banjir kamu harus menuju…", a:["Tempat tinggi","Sungai","Terowongan"], c:0},
+        {q:"Banjir bisa disebabkan oleh…", a:["Sampah & hujan","Matahari","Debu"], c:0},
+        {q:"Jika air mulai naik, hal yg dilakukan?", a:["Cabut listrik","Main di air","Diam"], c:0},
+        {q:"Air banjir biasanya…", a:["Kotor","Jernih","Aman diminum"], c:0},
+        {q:"Setelah banjir jangan…", a:["Sentuh kabel","Membersihkan rumah","Cek kondisi"], c:0},
+        {q:"Jika arus deras?", a:["Menerobos","Menghindari","Berenang"], c:1},
+        {q:"Saat banjir bawa barang…", a:["Penting & dokumen","Mainan","Batu"], c:0},
+        {q:"Jika terjebak di rumah?", a:["Naik ke lantai atas","Diam saja","Keluar lewat air"], c:0},
+        {q:"Saat banjir besar, kamu harus…", a:["Evakuasi","Selfie","Main toko"], c:0},
+        {q:"Cara mencegah banjir?", a:["Tidak buang sampah","Buang ke sungai","Biarkan menumpuk"], c:0}
+    ],
+
+    kebakaran: [
+        {q:"Saat terjadi kebakaran kamu harus…", a:["Keluar & evakuasi","Ambil barang","Sembunyi"], c:0},
+        {q:"Asap berbahaya karena…", a:["Toksik","Enak dihirup","Sejuk"], c:0},
+        {q:"Memadamkan api kecil pakai…", a:["APAR","Air minum","Kipas"], c:0},
+        {q:"Jika ruangan penuh asap kamu harus…", a:["Merunduk","Berdiri tegak","Lari-lari"], c:0},
+        {q:"Jangan gunakan… saat kebakaran", a:["Lift","Tangga","Pintu darurat"], c:0},
+        {q:"Jika baju terbakar lakukan…", a:["Stop, Drop, Roll","Lari","Lompat"], c:0},
+        {q:"Penyebab umum kebakaran rumah?", a:["Listrik korslet","Kesenggol angin","Debu"], c:0},
+        {q:"Jika mencium bau gas?", a:["Matikan listrik","Nyalakan api","Abaikan"], c:0},
+        {q:"Dalam kebakaran sekolah kamu harus…", a:["Ikuti evakuasi","Berlari acak","Masuk toilet"], c:0},
+        {q:"Saat api besar jangan…", a:["Masuk bangunan","Evakuasi","Telepon bantuan"], c:0}
+    ]
+};
+
+
+/* ====================
+   LOGIKA QUIZ
+==================== */
+
+let disaster = "";
+let index = 0;
+let score = 0;
+
+function startQuiz(type) {
+    disaster = type;
+    index = 0;
+    score = 0;
+
+    document.getElementById("quizBox").style.display = "block";
+    document.getElementById("quizTitle").innerText =
+        "Kuis " + type.toUpperCase();
+
+    loadQuestion();
+}
+
+function loadQuestion() {
+    let q = questions[disaster][index];
+
+    document.getElementById("questionText").innerText = 
+        (index + 1) + ". " + q.q;
+
+    let opt = "";
+    q.a.forEach((o, i) => {
+        opt += <button class='btn' onclick='checkAns(${i})'>${o}</button>;
+    });
+
+    document.getElementById("options").innerHTML = opt;
+}
+
+function checkAns(i) {
+    if (i === questions[disaster][index].c) score++;
+}
+
+function nextQuestion() {
+    index++;
+
+    if (index >= questions[disaster].length) return endQuiz();
+
+    loadQuestion();
+}
+
+function endQuiz() {
+
+    let edu = {
+        gempa: "Edukasi Gempa: Berlindung di bawah meja, lindungi kepala, jauhi kaca, jangan pakai lift, evakuasi setelah aman.",
+        banjir: "Edukasi Banjir: Hindari arus deras, matikan listrik, naik ke tempat tinggi, jangan sentuh kabel, jaga kebersihan lingkungan.",
+        kebakaran: "Edukasi Kebakaran: Stop-Drop-Roll, hindari asap, gunakan APAR untuk api kecil, jangan pakai lift, segera evakuasi."
+    };
+
+    document.getElementById("quizBox").innerHTML = `
+        <h2>🎉 Kuis Selesai!</h2>
+        <p>Benar: <b>${score}</b> dari 10 soal</p>
+        <p style="margin-top:20px;"><b>Edukasi:</b><br>${edu[disaster]}</p>
+        <button class="btn" onclick="location.reload()">Kembali ke Menu</button>
+    `;
+}
+
+</script>
+
+</body>
+</html>
