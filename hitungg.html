@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Simulasi Bencana Indonesia</title>
+
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        background: #0b0b0b;
+        color: white;
+        text-align: center;
+        margin: 0;
+        padding: 0;
+    }
+    h1 {
+        margin-top: 20px;
+        color: #00eaff;
+        text-shadow: 0 0 10px #00eaff;
+    }
+    #menu, #gameBox {
+        margin: 20px auto;
+        max-width: 600px;
+        padding: 20px;
+        background: #111;
+        border-radius: 15px;
+        box-shadow: 0 0 20px #00eaff;
+    }
+    .btn {
+        display: block;
+        width: 90%;
+        margin: 10px auto;
+        padding: 12px;
+        border-radius: 10px;
+        border: 1px solid #00eaff;
+        background: #0f1f2e;
+        color: white;
+        cursor: pointer;
+        transition: .2s;
+    }
+    .btn:hover { background: #00eaff; }
+    .hide { display: none; }
+
+    #footer {
+        margin-top: 40px;
+        color: #777;
+        padding-bottom: 20px;
+    }
+</style>
+</head>
+<body>
+
+<h1>SIMULASI BENCANA NASIONAL</h1>
+
+<div id="menu">
+    <h2>Pilih Mode Bencana</h2>
+    <button class="btn" onclick="mulai('gempa')">🌋 Mode Gempa</button>
+    <button class="btn" onclick="mulai('banjir')">🌊 Mode Banjir</button>
+    <button class="btn" onclick="mulai('kebakaran')">🔥 Mode Kebakaran</button>
+    <button class="btn" onclick="mulai('angin')">🌪 Puting Beliung</button>
+    <button class="btn" onclick="mulai('longsor')">🏔 Tanah Longsor</button>
+</div>
+
+<div id="gameBox" class="hide">
+    <h2 id="questionText">Loading...</h2>
+    <div id="answerButtons"></div>
+    <button class="btn" id="nextBtn" onclick="nextQuestion()">Selanjutnya</button>
+</div>
+
+<div id="footer">
+    ROBI & ARTA || SMAN KABUH JOMBANG 2025
+</div>
+
+<script>
+let mode = "";
+let index = 0;
+let benar = 0;
+
+const qText = document.getElementById("questionText");
+const ansBtn = document.getElementById("answerButtons");
+const gameBox = document.getElementById("gameBox");
+const menu = document.getElementById("menu");
+const nextBtn = document.getElementById("nextBtn");
+
+function mulai(m) {
+    mode = m;
+    index = 0;
+    benar = 0;
+    menu.classList.add("hide");
+    gameBox.classList.remove("hide");
+    nextBtn.style.display = "none";
+    loadQuestion();
+}
+
+function loadQuestion() {
+const bank = {
+        gempa: [
+            { q: "Saat gempa, apa yang harus dilakukan?", a: ["Lari panik", "Berlindung bawah meja", "Dekat jendela"], j: 1 },
+            { q: "Saat gempa di luar, tindakan aman?", a: ["Dekat bangunan", "Ke area terbuka", "Dekat pohon"], j: 1 },
+        ],
+        banjir: [
+            { q: "Air naik di rumahmu. Apa yang dilakukan?", a: ["Cabut listrik", "Main air", "Diam saja"], j: 0 },
+            { q: "Arus deras. Apa tindakan aman?", a: ["Hindari arus", "Terobos", "Lari tengah arus"], j: 0 },
+        ],
+        kebakaran: [
+            { q: "Ada asap tebal. Apa langkah aman?", a: ["Lari ke asap", "Merunduk & tutup hidung", "Diam"], j: 1 },
+            { q: "Kompor meledak. Apa yang harus dilakukan?", a: ["Sirami air", "Matikan gas", "Lihat saja"], j: 1 },
+        ],
+        angin: [
+            { q: "Puting beliung mendekat, tindakan aman?", a: ["Pergi ke tempat terbuka", "Masuk ke bangunan kokoh", "Dekat pohon"], j: 1 },
+            { q: "Saat angin kencang, hindari?", a: ["Pohon besar", "Bangunan kokoh", "Ruang aman"], j: 0 },
+        ],
+        longsor: [
+            { q: "Tanah bergerak & retak. Tindakan awal?", a: ["Mendekat retakan", "Evakuasi", "Selfie"], j: 1 },
+            { q: "Hujan deras di daerah rawan longsor. Kamu?", a: ["Tetap di rumah berbukit", "Waspada evakuasi", "Tidur"], j: 1 },
+        ]
+    };
+
+    const soal = bank[mode];
+    let s = soal[index];
+
+    qText.innerText = s.q;
+    ansBtn.innerHTML = "";
+    
+    s.a.forEach((opsi, i) => {
+        let b = document.createElement("button");
+        b.className = "btn";
+        b.innerText = opsi;
+        b.onclick = () => jawab(i);
+        ansBtn.appendChild(b);
+    });
+}
+
+function jawab(i) {
+    const soal = {
+        gempa: [],
+        banjir: [],
+        kebakaran: [],
+        angin: [],
+        longsor: []
+    };
+
+    let bankSemua = {
+        gempa: [
+            { j: 1 }, { j: 1 }
+        ],
+        banjir: [
+            { j: 0 }, { j: 0 }
+        ],
+        kebakaran: [
+            { j: 1 }, { j: 1 }
+        ],
+        angin: [
+            { j: 1 }, { j: 0 }
+        ],
+        longsor: [
+            { j: 1 }, { j: 1 }
+        ]
+    };
+
+    if (i == bankSemua[mode][index].j) benar++;
+
+    nextBtn.style.display = "block";
+}
+
+function nextQuestion() {
+    index++;
+    const total = {
+        gempa: 2,
+        banjir: 2,
+        kebakaran: 2,
+        angin: 2,
+        longsor: 2
+    }[mode];
+
+    if (index >= total) return selesai();
+
+    nextBtn.style.display = "none";
+    loadQuestion();
+}
+
+function selesai() {
+    qText.innerHTML = `
+        <h2>Simulasi Selesai!</h2>
+        Skor Kamu: <b>${benar}</b> / 2<br><br>
+        <button class="btn" onclick="location.reload()">Kembali ke Menu</button>
+    `;
+    ansBtn.innerHTML = "";
+    nextBtn.style.display = "none";
+}
+</script>
+
+</body>
+</html>
