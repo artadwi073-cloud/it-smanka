@@ -1,0 +1,166 @@
+<!DOCTYPE html><html lang="id">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Kuis Bencana Alam</title>
+    <style>
+        body { font-family: Arial, sans-serif; background: #eef3ff; margin: 0; padding: 0; }
+        .container { max-width: 600px; margin: auto; padding: 20px; }
+        .card { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+        h2 { margin-top: 0; }
+        .btn { width: 100%; padding: 12px; margin: 8px 0; background: #4a6cf7; border: none; border-radius: 10px; color: white; font-size: 16px; cursor: pointer; }
+        .option { padding: 12px; margin-top: 10px; background: #f1f4ff; border-radius: 10px; cursor: pointer; }
+        .option:hover { background: #dfe6ff; }
+        .hidden { display: none; }
+        .correct { background: #b7ffb7 !important; }
+        .wrong { background: #ffb7b7 !important; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="card">
+            <h2>Kuis Edukasi Bencana</h2><!-- Pilih Bencana -->
+        <div id="selectScreen">
+            <p>Pilih bencana yang ingin kamu pelajari:</p>
+            <button class="btn" onclick="selectDisaster('gempa')">Gempa Bumi</button>
+            <button class="btn" onclick="selectDisaster('banjir')">Banjir</button>
+            <button class="btn" onclick="selectDisaster('kebakaran')">Kebakaran</button>
+        </div>
+
+        <!-- Kuis -->
+        <div id="quizScreen" class="hidden">
+            <h3 id="questionText"></h3>
+            <div id="options"></div>
+        </div>
+
+        <!-- Hasil -->
+        <div id="resultScreen" class="hidden">
+            <h3>Hasil Kuis</h3>
+            <p id="scoreText"></p>
+            <div id="edukasiBox"></div>
+            <button class="btn" onclick="restart()">Kembali ke Menu Utama</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    const soal = {
+        gempa: {
+            list: [
+                { q: "Saat gempa terjadi di kelas, apa tindakan aman?", o:["Lari keluar", "Berlindung di bawah meja", "Dekat jendela"], a:1 },
+                { q: "Jika gempa saat di koridor?", o:["Menempel dinding & lindungi kepala", "Lari", "Turun tangga"], a:0 },
+                { q: "Di kantin saat gempa?", o:["Dekat kaca", "Di bawah meja", "Ambil makanan"], a:1 },
+                { q: "Lift saat gempa harus…", o:["Dipakai", "Tidak digunakan", "Dicoba dulu"], a:1 },
+                { q: "Setelah guncangan berhenti?", o:["Evakuasi", "Balik duduk", "Foto"], a:0 },
+                { q: "Posisi terbaik?", o:["Duduk", "Berdiri", "Drop Cover Hold On"], a:2 },
+                { q: "Plafon retak?", o:["Rekam", "Lindungi kepala", "Diam"], a:1 },
+                { q: "Dekat lemari?", o:["Dekat", "Menjauh", "Pegang lemari"], a:1 },
+                { q: "Hindari setelah gempa?", o:["Listrik rusak", "Titik kumpul", "Lapangan"], a:0 },
+                { q: "Ikuti siapa saat evakuasi?", o:["Teman", "Guru/petugas", "Sendiri"], a:1 }
+            ],
+            edukasi:<b>Edukasi Gempa:</b><br>- Lakukan Drop, Cover, Hold On.<br>- Hindari kaca dan lemari tinggi.<br>- Jangan gunakan lift.<br>- Evakuasi ke titik kumpul.
+        },
+
+        banjir: {
+            list: [
+                { q:"Saat air mulai naik, apa yang kamu lakukan?",o:["Main air","Naik ke tempat tinggi","Tetap di lantai"],a:1 },
+                { q:"Jika banjir masuk rumah?",o:["Matikan listrik","Tidur","Tunggu air naik"],a:0 },
+                { q:"Arus kuat, harus?",o:["Menerobos","Menghindari","Lari di air"],a:1 },
+                { q:"Benda penting saat evakuasi?",o:["HP & charger","Mainan","Baju pesta"],a:0 },
+                { q:"Banjir di sekolah?",o:["Naik meja","Keluar lewat arus","Main"],a:0 }
+            ],
+            edukasi:<b>Edukasi Banjir:</b><br>- Hindari arus deras.<br>- Matikan listrik.<br>- Simpan dokumen penting.<br>- Evakuasi ke tempat tinggi.
+        },
+
+        kebakaran: {
+            list:[
+                { q:"Saat ada asap?",o:["Lari ke asap","Merunduk & tutup hidung","Diam"],a:1 },
+                { q:"Jika melihat api kecil?",o:["Diam","Matikan listrik & gunakan APAR","Tutup dengan kain tipis"],a:1 },
+                { q:"Asap tebal di sekolah?",o:["Lewat asap","Merunduk & cari jalan keluar","Balik kelas"],a:1 },
+                { q:"Hal yang dilarang?",o:["Gunakan lift","Gunakan tangga","Ikuti petugas"],a:0 },
+                { q:"Yang harus dicari saat evakuasi?",o:["Area aman","Ruang penuh asap","Pojokan"],a:0 }
+            ],
+            edukasi:<b>Edukasi Kebakaran:</b><br>- Jangan gunakan lift.<br>- Merunduk saat banyak asap.<br>- Gunakan APAR jika kecil.<br>- Ikuti jalur evakuasi.
+        }
+    };
+
+    let selected = "";
+    let used = [];
+    let score = 0;
+    let current;
+
+    function selectDisaster(type){
+        selected = type;
+        used = [];
+        score = 0;
+        document.getElementById('selectScreen').classList.add('hidden');
+        document.getElementById('quizScreen').classList.remove('hidden');
+        loadQuestion();
+    }
+
+    function loadQuestion(){
+        const list = soal[selected].list;
+        if(used.length === list.length) return endQuiz();
+
+        let i; do{i = Math.floor(Math.random()*list.length);} while(used.includes(i));
+        used.push(i);
+        current = list[i];
+
+        document.getElementById('questionText').innerText = current.q;
+        const optBox = document.getElementById('options');
+        optBox.innerHTML = '';
+
+        current.o.forEach((opt,id)=>{
+            const div=document.createElement('div');
+            div.className='option'; div.innerText=opt;
+            div.onclick=()=>choose(id,div);
+            optBox.appendChild(div);
+        })
+    }
+
+    function choose(i, el){
+        const opts=document.querySelectorAll('.option');
+
+        if(i===current.a){ el.classList.add('correct'); score++; }
+        else{ el.classList.add('wrong'); opts[current.a].classList.add('correct'); }
+
+        opts.forEach(o=>o.onclick=null);
+        setTimeout(loadQuestion,900);
+    }
+
+    function endQuiz(){
+        document.getElementById('quizScreen').classList.add('hidden');
+        document.getElementById('resultScreen').classList.remove('hidden');
+        document.getElementById('scoreText').innerText = Skor kamu: ${score} / ${soal[selected].list.length};
+        document.getElementById('edukasiBox').innerHTML = soal[selected].edukasi;
+    }
+
+    function restart(){ location.reload(); }
+</script>
+<!-- SOUND EFFECTS -->
+<audio id="soundCorrect" src="correct.mp3"></audio>
+<audio id="soundWrong" src="wrong.mp3"></audio>
+<audio id="soundClick" src="click.mp3"></audio>
+
+<script>
+    // --- Tambah Pemanggilan Suara ---
+    function playSound(id){
+        const s = document.getElementById(id);
+        if(s) s.play();
+    }
+
+    // Klik tombol
+    document.addEventListener('click', ()=> playSound('soundClick'));
+
+    // Modifikasi bagian jawaban benar/salah
+    window.markAnswer = function(isCorrect){
+        if(isCorrect){
+            playSound('soundCorrect');
+        } else {
+            playSound('soundWrong');
+        }
+    }
+</script>
+
+</body>
+</html>
