@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Simulasi Bencana</title>
+<style>
+    body{
+        margin:0;
+        font-family: Arial;
+        background:#021f2a;
+        color:white;
+        text-align:center;
+    }
+    h1{ margin-top:30px; }
+    .btn{
+        width:80%;
+        padding:18px;
+        margin:15px auto;
+        border:2px solid #23cfff;
+        border-radius:18px;
+        font-size:24px;
+        background:#002d3a;
+        color:#23cfff;
+    }
+    .btn:hover{ background:#034459; cursor:pointer; }
+    #startBtn{
+        background:#00d9ff;
+        border:none;
+        color:black;
+        font-size:22px;
+        border-radius:16px;
+        margin-top:20px;
+    }
+    #quizBox, #resultBox{
+        display:none;
+    }
+    .option{
+        padding:15px;
+        margin:10px;
+        background:#013544;
+        border-radius:10px;
+        cursor:pointer;
+    }
+    .option:hover{
+        background:#025066;
+    }
+</style>
+</head>
+
+<body>
+
+<h1>Simulasi Edukasi Bencana</h1>
+
+<!-- MENU -->
+<div id="menuBox">
+    <button class="btn" id="btnGempa">🌍 Gempa</button>
+    <button class="btn" id="btnBanjir">🌊 Banjir</button>
+    <button class="btn" id="btnKebakaran">🔥 Kebakaran</button>
+    <button class="btn" id="startBtn">MULAI SIMULASI</button>
+
+    <p style="margin-top:40px;font-size:13px;opacity:0.7;">
+        ROBI & ARTA | SMAN KABUH JOMBANG | 2025
+    </p>
+</div>
+
+<!-- QUIZ -->
+<div id="quizBox">
+    <h2 id="quizNumber"></h2>
+    <p id="questionText"></p>
+    <div id="options"></div>
+    <button id="nextBtn" style="margin-top:20px; padding:10px 20px;">Lanjut</button>
+</div>
+
+<!-- HASIL -->
+<div id="resultBox">
+    <h2>Hasil Akhir</h2>
+    <p id="scoreText"></p>
+    <p id="edukasiText"></p>
+    <button onclick="location.reload()">Ulangi</button>
+</div>
+
+<script>
+(() => {
+
+    // ===== STATE =====
+    let selectedMode = null; 
+    let qIndex = 0;
+    let score = 0;
+
+    // ===== REFS =====
+    const btnGempa     = document.getElementById("btnGempa");
+    const btnBanjir    = document.getElementById("btnBanjir");
+    const btnKebakaran = document.getElementById("btnKebakaran");
+    const startBtn     = document.getElementById("startBtn");
+
+    const menuBox   = document.getElementById("menuBox");
+    const quizBox   = document.getElementById("quizBox");
+    const resultBox = document.getElementById("resultBox");
+
+    const quizNumber   = document.getElementById("quizNumber");
+    const questionText = document.getElementById("questionText");
+    const optionsEl    = document.getElementById("options");
+    const nextBtn      = document.getElementById("nextBtn");
+
+    const scoreText   = document.getElementById("scoreText");
+    const edukasiText = document.getElementById("edukasiText");
+// ====== BANK SOAL (15 GEMPA + 15 BANJIR + 15 KEBAKARAN) ======
+    const soal = {
+        gempa: [
+            { q:"Apa yang harus dilakukan saat gempa?", a:["Berlari keluar panik","Berlindung di bawah meja","Berdiri dekat jendela"], c:1 },
+            { q:"Posisi aman saat gempa?", a:["Dekat lemari besar","Di bawah meja kuat","Di bawah tangga"], c:1 },
+            { q:"Jika di luar saat gempa?", a:["Berdiri dekat gedung","Menjauh ke area terbuka","Dekat tiang listrik"], c:1 },
+            { q:"Jika di sekolah saat gempa?", a:["Bersembunyi di toilet","Drop-Cover-Hold","Lari ke lantai atas"], c:1 },
+            { q:"Jika sedang naik motor?", a:["Ngebut","Menepi & berhenti","Tetap jalan"], c:1 },
+            { q:"Setelah gempa?", a:["Masuk bangunan retak","Tetap waspada gempa susulan","Tidur"], c:1 },
+            { q:"Jika terjebak?", a:["Teriak keras","Gunakan benda untuk bunyikan suara","Diam"], c:1 },
+            { q:"Barang darurat?", a:["Senter, air, P3K","Boneka","TV"], c:0 },
+            { q:"Jangan gunakan apa saat gempa?", a:["Lift","Tangga","Motor"], c:0 },
+            { q:"Jika kaca pecah?", a:["Dekati","Jauhi area","Injak saja"], c:1 },
+            { q:"Jika listrik mati?", a:["Panikan diri","Gunakan senter","Nyalakan kembang api"], c:1 },
+            { q:"Tempat paling aman?", a:["Dekat jendela","Bawah meja","Depan kulkas"], c:1 },
+            { q:"Gerakan aman?", a:["Drop-Cover-Hold","Tiduran","Loncat-loncat"], c:0 },
+            { q:"Jangan berdiri di mana?", a:["Lapangan","Dekat bangunan tinggi","Area terbuka"], c:1 },
+            { q:"Setelah aman?", a:["Periksa luka & bantu orang","Selfie","Balik lagi ke rumah retak"], c:0 }
+        ],
+
+        banjir: [
+            { q:"Apa yang tidak boleh dilakukan saat banjir?", a:["Bermain air","Mengungsi","Matikan listrik"], c:0 },
+            { q:"Jika air naik cepat?", a:["Tunggu di rumah","Segera mengungsi","Tidur"], c:1 },
+            { q:"Barang yang penting?", a:["Dokumen penting","Batu","Kipas"], c:0 },
+            { q:"Jika terjebak?", a:["Naik tempat tinggi","Buka pintu paksa","Diam"], c:0 },
+            { q:"Saat banjir, listrik harus?", a:["Dimatikan","Dinyalakan","Dibiarkan"], c:0 },
+            { q:"Jika arus deras?", a:["Coba menyeberang","Jangan nekat lewat","Berenang"], c:1 },
+            { q:"Jika rumah tergenang?", a:["Tetap di dalam","Keluar ke tempat aman","Berenang keliling"], c:1 },
+            { q:"Virus & penyakit sering muncul, maka?", a:["Minum air banjir","Gunakan air bersih","Tidak mandi"], c:1 },
+            { q:"Apa yang harus dibawa mengungsi?", a:["P3K & makanan","TV","Galon kosong"], c:0 },
+            { q:"Setelah banjir?", a:["Bersihkan lumpur & cek listrik","Langsung tidur","Main di genangan"], c:0 },
+            { q:"Jika terbawa arus?", a:["Mencari pegangan","Lepas semua pakaian","Diam di tengah arus"], c:0 },
+            { q:"Jangan lakukan saat hujan deras?", a:["Pantau info cuaca","Masuk sungai","Siapkan tas darurat"], c:1 },
+            { q:"Simbol peringatan banjir biasanya?", a:["Air meluap","Awan cerah","Gunung meletus"], c:0 },
+            { q:"Langkah awal sebelum banjir?", a:["Cek saluran air","Tidur","Buang sampah ke sungai"], c:0 },
+            { q:"Tempat aman mengungsi?", a:["Tempat tinggi","Dekat sungai","Atap rumah rapuh"], c:0 }
+        ],
+
+        kebakaran: [
+            { q:"Jika terjadi kebakaran?", a:["Panik","Cari jalan keluar","Sembunyi di dalam"], c:1 },
+            { q:"Jika ruangan penuh asap?", a:["Merangkak rendah","Lari berdiri","Menghirup asap"], c:0 },
+            { q:"Alat pemadam ringan?", a:["APAR","Panci","Kipas"], c:0 },
+            { q:"Jika baju terbakar?", a:["STOP-DROP-ROLL","Lari","Lompat-lompat"], c:0 },
+            { q:"Boleh gunakan lift?", a:["Boleh","Tidak boleh","Kadang boleh"], c:1 },
+            { q:"Jika kompor meledak?", a:["Sirami air","Matikan gas","Dekati apinya"], c:1 },
+            { q:"Jika bau gas?", a:["Hidupkan korek","Matikan sumber gas","Main HP di dekatnya"], c:1 },
+            { q:"Nomor darurat kebakaran?", a:["113","911","777"], c:0 },
+            { q:"Jika terjebak?", a:["Tutup celah pintu","Buka pintu panas","Panikan diri"], c:0 },
+            { q:"Penyebab terbesar kebakaran rumah?", a:["Listrik korslet","Hujan","Gempa"], c:0 },
+            { q:"APAR harus diarahkan ke?", a:["Sumber api","Atap","Lantai"], c:0 },
+            { q:"Jika asap masuk?", a:["Gunakan kain basah","Buka jendela dekat api","Tarik napas panjang"], c:0 },
+            { q:"Barang yang tidak boleh dekat kompor?", a:["Kain & plastik","Panci","Sendok"], c:0 },
+            { q:"Jika alarm berbunyi?", a:["Periksa lalu evakuasi","Abaikan","Tidur lagi"], c:0 },
+            { q:"Sikap terbaik saat kebakaran?", a:["Tenang & evakuasi","Selfie","Sembunyi di lemari"], c:0 }
+        ]
+    };
+
+    // ===================== PILIH MODE =====================
+    btnGempa.onclick = () => { selectedMode = "gempa"; };
+    btnBanjir.onclick = () => { selectedMode = "banjir"; };
+    btnKebakaran.onclick = () => { selectedMode = "kebakaran"; };
+
+    // ===================== MULAI =====================
+    startBtn.onclick = () => {
+        if (!selectedMode) return alert("Pilih jenis bencana dulu Bro!");
+        menuBox.style.display = "none";
+        quizBox.style.display = "block";
+        loadSoal();
+    };
+
+    // ===================== LOAD SOAL =====================
+    function loadSoal(){
+        const s = soal[selectedMode][qIndex];
+        quizNumber.textContent = Soal ${qIndex+1} / 15;
+        questionText.textContent = s.q;
+
+        optionsEl.innerHTML = "";
+        s.a.forEach((opsi, i) => {
+            const div = document.createElement("div");
+            div.className = "option";
+            div.textContent = opsi;
+            div.onclick = () => pilih(i);
+            optionsEl.appendChild(div);
+        });
+    }
+
+    function pilih(i){
+        if (i === soal[selectedMode][qIndex].c) score++;
+        nextBtn.style.display = "block";
+    }
+
+    nextBtn.onclick = () => {
+        qIndex++;
+        nextBtn.style.display = "none";
+
+        if (qIndex >= 15){
+            selesai();
+        } else {
+            loadSoal();
+        }
+    };
+
+    // ===================== HASIL =====================
+    function selesai(){
+        quizBox.style.display = "none";
+        resultBox.style.display = "block";
+
+        scoreText.textContent = Nilai kamu: ${score} / 15;
+
+        edukasiText.textContent =
+            selectedMode === "gempa" ? "Tetap lakukan DROP-COVER-HOLD saat gempa!" :
+            selectedMode === "banjir" ? "Selalu matikan listrik & evakuasi awal saat banjir!" :
+            "Ingat STOP-DROP-ROLL & jangan panik saat kebakaran!";
+    }
+
+})();
+</script>
+</body>
+</html>
