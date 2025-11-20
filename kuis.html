@@ -1,0 +1,131 @@
+<!DOCTYPE html><html lang="id">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Kuis Simulasi Gempa</title>
+    <style>
+        body { font-family: Arial, sans-serif; background: #eef3ff; margin: 0; padding: 0; }
+        .container { max-width: 600px; margin: auto; padding: 20px; }
+        .card { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+        h2 { margin-top: 0; }
+        .btn { width: 100%; padding: 12px; margin: 8px 0; background: #4a6cf7; border: none; border-radius: 10px; color: white; font-size: 16px; cursor: pointer; }
+        .option { padding: 12px; margin-top: 10px; background: #f1f4ff; border-radius: 10px; cursor: pointer; }
+        .option:hover { background: #dfe6ff; }
+        .hidden { display: none; }
+        .correct { background: #b7ffb7 !important; }
+        .wrong { background: #ffb7b7 !important; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="card">
+            <h2>Kuis Simulasi Gempa</h2><div id="startScreen">
+            <p>Latihan edukasi gempa: 15 soal acak + edukasi akhir. Siap mulai bro?</p>
+            <button class="btn" onclick="startQuiz()">Mulai Kuis</button>
+        </div>
+
+        <div id="quizScreen" class="hidden">
+            <h3 id="questionText"></h3>
+            <div id="options"></div>
+        </div>
+
+        <div id="resultScreen" class="hidden">
+            <h3>Hasil Kuis</h3>
+            <p id="scoreText"></p>
+            <div id="edukasiBox"></div>
+            <button class="btn" onclick="startQuiz()">Ulangi Kuis</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    const questions = [
+        { q: "Saat gempa terjadi di kelas, apa tindakan paling aman?", options: ["Lari keluar secepatnya", "Berlindung di bawah meja", "Berdiri dekat jendela"], answer: 1 },
+        { q: "Jika gempa terjadi saat kamu di koridor?", options: ["Menempel ke dinding sambil lindungi kepala", "Turun tangga cepat", "Lari ke lapangan"], answer: 0 },
+        { q: "Di kantin saat gempa, apa yang kamu lakukan?", options: ["Sembunyi di balik kaca", "Merunduk di bawah meja", "Lari sambil bawa makanan"], answer: 1 },
+        { q: "Saat gempa, lift harus…", options: ["Tetap digunakan", "Tidak digunakan", "Dipanggil petugas"], answer: 1 },
+        { q: "Setelah guncangan berhenti?", options: ["Evakuasi ke titik kumpul", "Balik main HP", "Masuk kelas lagi"], answer: 0 },
+        { q: "Posisi tubuh terbaik saat gempa?", options: ["Duduk biasa", "Berdiri tegak", "Drop, Cover, Hold On"], answer: 2 },
+        { q: "Plafon mulai retak saat gempa?", options: ["Lari ke luar", "Lindungi kepala & menjauh dari benda jatuh", "Rekam untuk konten"], answer: 1 },
+        { q: "Dekat lemari tinggi saat gempa?", options: ["Tetap dekat", "Menjauh dari lemari", "Pegang lemari biar nggak jatuh"], answer: 1 },
+        { q: "Apa yang harus dihindari setelah gempa?", options: ["Area listrik rusak", "Titik kumpul", "Tempat terbuka"], answer: 0 },
+        { q: "Siapa yang harus kamu ikuti saat evakuasi?", options: ["Arah teman", "Guru/petugas", "Lari sendiri"], answer: 1 },
+        { q: "Kalau gempa saat upacara?", options: ["Tetap baris", "Duduk dan lindungi kepala", "Lari acak"], answer: 1 },
+        { q: "Jika kaca pecah saat gempa?", options: ["Dekat jendela", "Menjauh dari kaca", "Pindah ke bawah AC"], answer: 1 },
+        { q: "Gempa saat di toilet?", options: ["Lari keluar saat guncangan", "Lindungi kepala & tetap di tempat aman", "Berpegangan ke pintu"], answer: 1 },
+        { q: "Jika listrik padam setelah gempa?", options: ["Tetap tenang & ikut evakuasi", "Balik ke kelas", "Nunggu listrik nyala"], answer: 0 },
+        { q: "Apa yang tidak boleh dilakukan saat gempa?", options: ["Berlindung", "Menjaga kepala", "Panik & teriak-teriak"], answer: 2 }
+    ];
+
+    const edukasiText = `
+    <b>Edukasi Gempa:</b><br>
+    - Saat gempa, lakukan Drop, Cover, Hold On.<br>
+    - Jangan panik, lindungi kepala dengan tas atau tangan.<br>
+    - Jauhi jendela, lemari tinggi, dan benda yang dapat jatuh.<br>
+    - Setelah gempa berhenti, segera menuju titik kumpul sekolah.<br>
+    - Ikuti arahan guru/petugas sekolah, bukan teman.<br>
+    - Jangan gunakan lift saat dan setelah gempa.<br>
+    - Tetap waspada terhadap retakan bangunan dan kabel listrik.
+    `;
+
+    let used = [];
+    let score = 0;
+    let current;
+
+    function startQuiz() {
+        score = 0;
+        used = [];
+        document.getElementById('startScreen').classList.add('hidden');
+        document.getElementById('quizScreen').classList.remove('hidden');
+        document.getElementById('resultScreen').classList.add('hidden');
+        loadQuestion();
+    }
+
+    function loadQuestion() {
+        if (used.length === 15) return endQuiz();
+
+        let index;
+        do { index = Math.floor(Math.random() * questions.length); }
+        while (used.includes(index));
+
+        used.push(index);
+        current = questions[index];
+
+        document.getElementById('questionText').innerText = current.q;
+        const optBox = document.getElementById('options');
+        optBox.innerHTML = '';
+
+        current.options.forEach((opt, i) => {
+            const div = document.createElement('div');
+            div.className = 'option';
+            div.innerText = opt;
+            div.onclick = () => choose(i, div);
+            optBox.appendChild(div);
+        });
+    }
+
+    function choose(i, el) {
+        const opts = document.querySelectorAll('.option');
+
+        if (i === current.answer) {
+            el.classList.add('correct');
+            score++;
+        } else {
+            el.classList.add('wrong');
+            opts[current.answer].classList.add('correct');
+        }
+
+        opts.forEach(o => o.onclick = null);
+        setTimeout(loadQuestion, 900);
+    }
+
+    function endQuiz() {
+        document.getElementById('quizScreen').classList.add('hidden');
+        document.getElementById('resultScreen').classList.remove('hidden');
+        document.getElementById('scoreText').innerText = Skor kamu: ${score} / 15;
+        document.getElementById('edukasiBox').innerHTML = edukasiText;
+    }
+</script>
+
+</body>
+</html>
