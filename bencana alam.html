@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Simulasi & Kuis Bencana Alam</title>
+
+<style>
+    body {
+        margin: 0;
+        padding: 0;
+        font-family: Arial, sans-serif;
+        background: #071826;
+        color: white;
+        text-align: center;
+    }
+
+    h1 {
+        margin-top: 40px;
+        color: #00d9ff;
+        font-size: 26px;
+        font-weight: bold;
+    }
+
+    .subtitle {
+        margin-top: -10px;
+        color: #b5c9d6;
+        font-size: 14px;
+        margin-bottom: 30px;
+    }
+
+    .container {
+        width: 90%;
+        max-width: 450px;
+        margin: auto;
+        background: rgba(255,255,255,0.03);
+        padding: 25px;
+        border-radius: 18px;
+        border: 1px solid rgba(255,255,255,0.1);
+        box-shadow: 0 0 20px rgba(0,255,255,0.1);
+    }
+
+    .mode {
+        padding: 15px;
+        margin: 10px 0;
+        border: 1px solid #00e1ff;
+        border-radius: 15px;
+        cursor: pointer;
+        font-size: 18px;
+        color: #00e1ff;
+        transition: 0.3s;
+    }
+
+    .mode:hover, .mode.active {
+        background: #00e1ff33;
+    }
+
+    button {
+        width: 200px;
+        padding: 14px;
+        margin-top: 20px;
+        border: none;
+        border-radius: 10px;
+        background: #00d9ff;
+        color: black;
+        font-size: 17px;
+        font-weight: bold;
+        cursor: pointer;
+        transition: 0.2s;
+    }
+
+    button:hover {
+        opacity: 0.8;
+    }
+
+    /* --- AREA QUIZ --- */
+    #quizBox, #resultBox {
+        display: none;
+        margin-top: 20px;
+        padding: 20px;
+    }
+
+    .question {
+        font-size: 18px;
+        margin-bottom: 15px;
+        color: #00d9ff;
+    }
+
+    .option {
+        padding: 12px;
+        margin: 8px 0;
+        background: rgba(255,255,255,0.08);
+        border-radius: 10px;
+        cursor: pointer;
+        transition: 0.2s;
+    }
+
+    .option:hover {
+        background: #00e1ff33;
+    }
+
+    #nextBtn {
+        margin-top: 15px;
+        width: 170px;
+    }
+
+    footer {
+        margin-top: 50px;
+        font-size: 12px;
+        opacity: 0.6;
+    }
+</style>
+</head>
+
+<body>
+
+<h1>Simulasi & Kuis Bencana Alam</h1>
+<p class="subtitle">Pilih mode lalu kerjakan 10 soal — setelah selesai muncul edukasi</p>
+
+<div class="container" id="menuBox">
+    <div class="mode" onclick="selectMode('gempa')" id="btnGempa">🌐 Gempa Bumi</div>
+    <div class="mode" onclick="selectMode('banjir')" id="btnBanjir">🌊 Banjir</div>
+    <div class="mode" onclick="selectMode('kebakaran')" id="btnKebakaran">🔥 Kebakaran</div>
+
+    <button onclick="startQuiz()">MULAI SIMULASI</button>
+</div>
+
+<!-- QUIZ AREA -->
+<div id="quizBox">
+    <p id="quizNumber"></p>
+    <p class="question" id="questionText"></p>
+    <div id="options"></div>
+    <button id="nextBtn" onclick="nextQuestion()">NEXT</button>
+</div>
+
+<!-- RESULT AREA -->
+<div id="resultBox">
+    <h2>Hasil Kamu</h2>
+    <p id="scoreText"></p>
+    <h3>Edukasi:</h3>
+    <p id="edukasiText"></p>
+    <button onclick="location.reload()">KEMBALI</button>
+</div>
+
+<footer>ROBI & ARTA | SMAN KABUH JOMBANG | 2025</footer>
+
+(() => {
+  // ====== STATE ======
+  let selectedMode = null; // 'gempa' | 'banjir' | 'kebakaran'
+  let qIndex = 0;
+  let score = 0;
+  let chosenOption = null;
+
+  // ====== REFS ======
+  const btnGempa = document.getElementById('btnGempa');
+  const btnBanjir = document.getElementById('btnBanjir');
+  const btnKebakaran = document.getElementById('btnKebakaran');
+  const startBtn = document.querySelector('.container button');
+  const menuBox = document.getElementById('menuBox');
+
+  const quizBox = document.getElementById('quizBox');
+  const quizNumber = document.getElementById('quizNumber');
+  const questionText = document.getElementById('questionText');
+  const optionsEl = document.getElementById('options');
+  const nextBtn = document.getElementById('nextBtn');
+
+  const resultBox = document.getElementById('resultBox');
+  const scoreText = document.getElementById('scoreText');
+  const edukasiText = document.getElementById('edukasiText');
+
+  // ====== BANK: 10 soal per bencana (pilihan lengkap + index jawaban benar) ======
+  const BANK = {
+    gempa: [
+      { q: "Saat gempa, hal pertama yang harus dilakukan adalah…", a: ["Lari keluar panik", "Berlindung di bawah meja/struktur kuat", "Ambil barang berharga"], c: 1 },
+      { q: "Posisi yang direkomendasikan saat gempa di dalam ruangan:", a: ["Dekat jendela", "Duck, Cover & Hold (bawah meja)", "Berlari ke tangga"], c: 1 },
+      { q: "Saat gempa, jangan melakukan hal berikut:", a: ["Menunggu di bawah meja", "Dekati rak tinggi", "Lindungi kepala"], c: 1 },
+      { q: "Jika di lift saat gempa, yang benar:", a: ["Tunggu di dalam lift", "Segera keluar dan pakai tangga", "Naik ke lantai atas"], c: 1 },
+      { q: "Tanda potensi tsunami setelah gempa:", a: ["Permukaan laut surut jauh secara tiba-tiba", "Hujan deras", "Angin kencang"], c: 0 },
+      { q: "Setelah gempa besar selesai, yang harus dilakukan:", a: ["Langsung masuk ke bangunan yang rusak", "Periksa kondisi & matikan gas/listrik bila perlu", "Nyalakan lilin dan masak"], c: 1 },
+      { q: "Jika terjebak di reruntuhan, sebaiknya:", a: ["Panik dan berteriak tanpa henti", "Buat ruang udara, tandai lokasi, berusaha tetap tenang", "Berusaha menggali sendiri tanpa alat"], c: 1 },
+      { q: "Saat aftershock (getaran susulan), yang benar:", a: ["Langsung kembali ke tempat berbahaya", "Tetap di lokasi aman dan waspada", "Naik ke atap"], c: 1 },
+      { q: "Tempat paling berbahaya saat gempa:", a: ["Lapangan terbuka", "Dekat etalase kaca & rak tinggi", "Jalan raya"], c: 1 },
+      { q: "Di mall saat gempa, sebaiknya:", a: ["Berlindung dekat etalase", "Ikuti petunjuk evakuasi & hindari lift", "Lari ke parkiran mencari kendaraan"], c: 1 }
+    ],
+
+    banjir: [
+      { q: "Langkah pertama jika air mulai masuk rumah:", a: ["Tunggu saja", "Cabut listrik utama jika aman & pindahkan barang penting ke tempat tinggi", "Mencari perahu sendiri"], c: 1 },
+      { q: "Jika menemukan arus deras di jalan, lakukan:", a: ["Menerobos arus", "Putar balik dan cari jalur aman", "Parkir dan menunggu"], c: 1 },
+      { q: "Jika kabel listrik terendam, sebaiknya:", a: ["Sentuh untuk cek", "Laporkan & jauhi; cabut listrik bila aman", "Biarkan saja"], c: 1 },
+      { q: "Air banjir biasanya berbahaya karena…", a: ["Murni dan aman diminum", "Mengandung kotoran, bahan kimia, dan dapat menghantarkan listrik", "Menyegarkan rumah"], c: 1 },
+      { q: "Saat air sudah setinggi lutut, sebaiknya:", a: ["Tunggu di rumah tanpa rencana", "Segera evakuasi ke tempat lebih tinggi jika memungkinkan", "Jalani seperti biasa"], c: 1 },
+      { q: "Barang penting yang harus dibawa saat evakuasi:", a: ["Dokumen penting & obat-obatan", "Semua furnitur", "Perabot besar"], c: 0 },
+      { q: "Jika melihat orang terbawa arus, lakukan:", a: ["Terjun tanpa alat", "Panggil pertolongan & gunakan alat bantu jika memungkinkan", "Rekam untuk bukti"], c: 1 },
+      { q: "Setelah banjir surut, hal pertama yang aman dilakukan:", a: ["Langsung menyalakan listrik", "Periksa instalasi listrik oleh teknisi & bersihkan setelah aman", "Langsung memasak di dapur"], c: 1 },
+      { q: "Cara mencegah banjir lokal:", a: ["Membuang sampah di sungai", "Menjaga saluran air tetap bersih & menanam pohon", "Menguruk sungai"], c: 1 },
+      { q: "Saat banjir, yang harus dihindari:", a: ["Ikuti informasi resmi", "Menerobos arus deras", "Evakuasi ke tempat aman bila disarankan"], c: 1 }
+    ],
+
+    kebakaran: [
+      { q: "Langkah pertama saat tercium asap/terjadi kebakaran:", a: ["Mengabaikannya", "Aktifkan alarm jika ada & evakuasi mengikuti rute aman", "Cari barang berharga dulu"], c: 1 },
+      { q: "Asap kebakaran berbahaya karena…", a: ["Mengandung gas beracun & partikel yang menyulitkan pernapasan", "Menyegarkan ruangan", "Tidak berbahaya"], c: 0 },
+      { q: "Jika pakaian terbakar pada seseorang:", a: ["Biarkan korban berlari", "Stop, Drop, Roll (berhenti, tengkurap & gulung)", "Sirami dengan air es langsung"], c: 1 },
+      { q: "Saat lorong penuh asap, langkah terbaik:", a: ["Berdiri tegak & tarik napas dalam", "Merunduk, tutupi hidung & mulut, menuju jalan keluar", "Lari sambil panik"], c: 1 },
+      { q: "Untuk memadamkan api kecil gunakan…", a: ["APAR atau kain basah bila aman", "Air minum dari gelas", "Kain kering saja"], c: 0 },
+      { q: "Saat alarm kebakaran berbunyi, jangan gunakan…", a: ["Tangga darurat", "Lift", "Pintu darurat"], c: 1 },
+      { q: "Jika terperangkap tanpa jalan keluar, lakukan:", a: ["Buka semua pintu tanpa cek", "Tutup celah pintu & beri tanda di jendela untuk minta pertolongan", "Panikan diri"], c: 1 },
+      { q: "Sumber api umum di rumah adalah…", a: ["Kompor/gas & korsleting listrik", "Es batu", "Buku"], c: 0 },
+      { q: "Setelah memadamkan api kecil dengan APAR, sebaiknya:", a: ["Langsung masuk kembali tanpa cek", "Pastikan sumber padam & laporkan/cek pihak berwenang", "Nyalakan listrik secepatnya"], c: 1 },
+      { q: "Saat kebakaran, hal yang harus dihindari:", a: ["Evakuasi melalui rute aman", "Mencoba naik lift", "Ikuti instruksi petugas pemadam"], c: 1 }
+    ]
+  };
+
+  // ====== EDUKASI TEKS ======
+  const EDU = {
+    gempa: `Edukasi Gempa:
+- Berlindung di bawah meja/struktur kuat (Duck, Cover, Hold).
+- Jauhkan dari kaca, rak tinggi, dan benda yang bisa jatuh.
+- Jangan gunakan lift; pakai tangga saat evakuasi jika perlu.
+- Setelah aman: periksa keluarga, matikan gas/listrik bila diperlukan, ikuti instruksi resmi.`,
+    banjir: `Edukasi Banjir:
+- Cabut listrik utama jika aman dan pindahkan barang penting ke tempat tinggi.
+- Hindari menerobos arus deras; segera evakuasi ke tempat lebih tinggi.
+- Jangan menyentuh kabel listrik yang terkena air; laporkan ke petugas.
+- Setelah banjir: cek instalasi listrik sebelum dinyalakan kembali dan bersihkan secara aman.`,
+    kebakaran: `Edukasi Kebakaran:
+- Jika tercium asap atau api: aktifkan alarm dan evakuasi sesuai rute aman (jangan gunakan lift).
+- Jika pakaian terbakar: lakukan Stop-Drop-Roll.
+- Gunakan APAR untuk api kecil bila aman; panggil petugas untuk api besar.
+- Jangan kembali ke bangunan sampai dinyatakan aman oleh petugas.`
+  };
+
+  // ====== UTILS & UI HELPERS ======
+  function clearActiveModes() {
+    [btnGempa, btnBanjir, btnKebakaran].forEach(b => b.classList.remove('active'));
+  }
+
+  window.selectMode = function(m) {
+    selectedMode = m;
+    clearActiveModes();
+    if (m === 'gempa') btnGempa.classList.add('active');
+    if (m === 'banjir') btnBanjir.classList.add('active');
+    if (m === 'kebakaran') btnKebakaran.classList.add('active');
+  };
+
+  // default mode
+  selectMode('gempa');
+
+  window.startQuiz = function() {
+    // require mode selection
+    if (!selectedMode) {
+      alert('Pilih mode terlebih dahulu (Gempa / Banjir / Kebakaran).');
+      return;
+    }
+    // reset
+    qIndex = 0;
+    score = 0;
+    chosenOption = null;
+
+    // hide menu, show quiz
+    menuBox.style.display = 'none';
+    quizBox.style.display = 'block';
+    resultBox.style.display = 'none';
+    renderQuestion();
+  };
+
+  function renderQuestion() {
+    const list = BANK[selectedMode];
+    if (!list || qIndex >= list.length) {
+      endQuiz();
+      return;
+    }
+
+    const item = list[qIndex];
+    quizNumber.textContent = Soal ${qIndex + 1} / ${list.length};
+    questionText.textContent = item.q;
+
+    // build options
+    optionsEl.innerHTML = '';
+    chosenOption = null;
+    nextBtn.disabled = true;
+
+    item.a.forEach((optText, i) => {
+      const div = document.createElement('div');
+      div.className = 'option';
+      div.tabIndex = 0;
+      div.textContent = ${String.fromCharCode(65 + i)}. ${optText};
+      div.addEventListener('click', () => {
+        // clear previous selection
+        optionsEl.querySelectorAll('.option').forEach(x => x.classList.remove('selected'));
+        div.classList.add('selected');
+        chosenOption = i;
+        nextBtn.disabled = false;
+      });
+      div.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') div.click();
+      });
+      optionsEl.appendChild(div);
+    });
+  }
+
+  window.nextQuestion = function() {
+    // require selection
+    if (chosenOption === null) {
+      alert('Pilih jawaban dulu ya.');
+      return;
+    }
+    const right = BANK[selectedMode][qIndex].c;
+    if (chosenOption === right) score++;
+
+    qIndex++;
+    chosenOption = null;
+
+    // next or finish
+    if (qIndex >= BANK[selectedMode].length) {
+      endQuiz();
+    } else {
+      renderQuestion();
+    }
+  };
+
+  function endQuiz() {
+    quizBox.style.display = 'none';
+    resultBox.style.display = 'block';
+
+    const total = BANK[selectedMode].length;
+    const percent = Math.round((score / total) * 100);
+
+    scoreText.innerHTML = Skor: <b>${score}</b> dari ${total} soal — (<b>${percent}%</b>);
+    edukasiText.textContent = EDU[selectedMode] || '';
+
+    // reset menu visibility stays hidden until user clicks KEMBALI (which reloads page in Part1)
+  }
+
+  // allow returning to menu via the existing "KEMBALI" button (in Part1 reload is used)
+  // If you want to implement "back to menu without reload", you can replace location.reload() with a function:
+  // function backToMenu() { resultBox.style.display='none'; menuBox.style.display='block'; }
+
+  // optional: keyboard support for 1..4 and Enter to next
+  document.addEventListener('keydown', (e) => {
+    if (quizBox.style.display !== 'block') return;
+    const opts = optionsEl.querySelectorAll('.option');
+    if (e.key >= '1' && e.key <= String(opts.length)) {
+      const idx = Number(e.key) - 1;
+      if (opts[idx]) opts[idx].click();
+    } else if (e.key === 'Enter') {
+      if (!nextBtn.disabled) nextBtn.click();
+    }
+  });
+
+  // make nextBtn disabled initially
+  nextBtn.disabled = true;
+
+})();
+
+<script src="script.js"></script>
+
+</body>
+</html>
