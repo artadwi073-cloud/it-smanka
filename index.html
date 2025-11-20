@@ -47,6 +47,28 @@
         color: #777;
         padding-bottom: 20px;
     }
+    
+    .edukasi-box {
+        background: #1a2b3c;
+        border-radius: 10px;
+        padding: 15px;
+        margin: 20px 0;
+        border-left: 5px solid #00eaff;
+        text-align: left;
+    }
+    
+    .edukasi-box h3 {
+        color: #00eaff;
+        margin-top: 0;
+    }
+    
+    .edukasi-box ul {
+        padding-left: 20px;
+    }
+    
+    .edukasi-box li {
+        margin-bottom: 8px;
+    }
 </style>
 </head>
 <body>
@@ -148,6 +170,63 @@ const questionBank = {
     ]
 };
 
+// Pesan edukasi untuk setiap bencana
+const edukasiBencana = {
+    gempa: `
+        <h3>🌋 Tindakan Pertama Saat Gempa Bumi</h3>
+        <ul>
+            <li><strong>Jika di dalam ruangan:</strong> Berlindung di bawah meja yang kokoh, lindungi kepala, dan berpegangan sampai gempa berhenti</li>
+            <li><strong>Jika di luar ruangan:</strong> Jauhi bangunan, pohon, dan tiang listrik, cari area terbuka</li>
+            <li><strong>Jika di kendaraan:</strong> Berhenti di tempat aman, tetap di dalam kendaraan</li>
+            <li><strong>Setelah gempa:</strong> Periksa diri dan orang sekitar, evakuasi dengan hati-hati, waspada gempa susulan</li>
+            <li><strong>Hindari:</strong> Lift, jendela kaca, rak tinggi, dan pantai (risiko tsunami)</li>
+        </ul>
+    `,
+    banjir: `
+        <h3>🌊 Tindakan Pertama Saat Banjir</h3>
+        <ul>
+            <li><strong>Evakuasi dini:</strong> Pindah ke tempat yang lebih tinggi sebelum banjir semakin parah</li>
+            <li><strong>Matikan listrik:</strong> Cabut semua peralatan elektronik untuk menghindari konsleting</li>
+            <li><strong>Hindari air banjir:</strong> Jangan berjalan atau berkendara melalui air banjir yang mengalir deras</li>
+            <li><strong>Siapkan kebutuhan darurat:</strong> Makanan, air minum, obat-obatan, dan dokumen penting</li>
+            <li><strong>Jika terjebak:</strong> Hubungi nomor darurat dan cari tempat yang tinggi untuk menunggu pertolongan</li>
+        </ul>
+    `,
+    kebakaran: `
+        <h3>🔥 Tindakan Pertama Saat Kebakaran</h3>
+        <ul>
+            <li><strong>Langkah pertama:</strong> Segera keluar dari gedung, jangan mengambil barang berharga</li>
+            <li><strong>Peringatkan orang lain:</strong> Ketuk pintu dan berteriak untuk membangunkan penghuni lain</li>
+            <li><strong>Hindari asap:</strong> Merunduk dan tutup hidung dengan kain basah</li>
+            <li><strong>Jangan gunakan lift:</strong> Selalu gunakan tangga darurat</li>
+            <li><strong>Jika pakaian terbakar:</strong> Berhenti, jatuh, dan berguling (Stop, Drop, and Roll)</li>
+            <li><strong>Tentukan titik kumpul:</strong> Kumpul di tempat yang aman dan sudah ditentukan</li>
+        </ul>
+    `,
+    angin: `
+        <h3>🌪 Tindakan Pertama Saat Angin Kencang/Puting Beliung</h3>
+        <ul>
+            <li><strong>Cari tempat berlindung:</strong> Masuk ke bangunan kokoh atau ruang bawah tanah</li>
+            <li><strong>Jauhi jendela:</strong> Cari ruangan tanpa jendela di lantai dasar</li>
+            <li><strong>Jika di luar:</strong> Cari tempat rendah dan rata, berbaring dengan tangan melindungi kepala</li>
+            <li><strong>Jika di kendaraan:</strong> Keluar dan cari tempat berlindung yang kokoh</li>
+            <li><strong>Hindari:</strong> Jembatan, jalan layang, pohon besar, dan papan reklame</li>
+            <li><strong>Persiapan:</strong> Simpan baterai, senter, dan radio untuk informasi darurat</li>
+        </ul>
+    `,
+    longsor: `
+        <h3>🏔 Tindakan Pertama Saat Tanah Longsor</h3>
+        <ul>
+            <li><strong>Waspada tanda peringatan:</strong> Retakan tanah, pohon miring, suara gemuruh dari bukit</li>
+            <li><strong>Evakuasi segera:</strong> Jangan menunggu perintah jika melihat tanda bahaya</li>
+            <li><strong>Menjauhi lereng:</strong> Cari tempat datar yang jauh dari tebing atau lereng curam</li>
+            <li><strong>Jika terjebak:</strong> Buat gerakan berenang untuk tetap di permukaan material longsor</li>
+            <li><strong>Setelah longsor:</strong> Jangan langsung kembali, tunggu petugas menyatakan aman</li>
+            <li><strong>Bantu tetangga:</strong> Periksa dan bantu orang lain yang mungkin terjebak atau luka</li>
+        </ul>
+    `
+};
+
 function mulai(m) {
     mode = m;
     index = 0;
@@ -206,6 +285,9 @@ function selesai() {
     qText.innerHTML = `
         <h2>Simulasi Selesai!</h2>
         Skor Kamu: <b>${benar}</b> / 10<br><br>
+        <div class="edukasi-box">
+            ${edukasiBencana[mode]}
+        </div>
         <button class="btn" onclick="location.reload()">Kembali ke Menu</button>
     `;
     ansBtn.innerHTML = "";
