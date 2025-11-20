@@ -1,0 +1,141 @@
+<script>
+let mode = "";
+let index = 0;
+let benar = 0;
+
+const qText = document.getElementById("questionText");
+const ansBtn = document.getElementById("answerButtons");
+const gameBox = document.getElementById("gameBox");
+const menu = document.getElementById("menu");
+const nextBtn = document.getElementById("nextBtn");
+
+function mulai(m) {
+    mode = m;
+    index = 0;
+    benar = 0;
+    menu.classList.add("hide");
+    gameBox.classList.remove("hide");
+    nextBtn.style.display = "none";
+    loadQuestion();
+}
+
+const bank = {
+    // Diperluas menjadi 10 soal
+    gempa: [
+        { q: "Saat gempa terjadi di dalam ruangan, apa yang harus dilakukan pertama kali?", a: ["Lari panik keluar rumah", "Berlindung di bawah meja/benda kokoh (Drop, Cover, Hold On)", "Dekat jendela dan dinding kaca"], j: 1 },
+        { q: "Jika Anda berada di luar ruangan saat gempa, tindakan aman yang harus dilakukan adalah?", a: ["Berdiri dekat bangunan tinggi atau tiang listrik", "Segera menuju area terbuka/lapangan", "Masuk kembali ke dalam rumah"], j: 1 },
+        { q: "Setelah guncangan gempa berhenti, hal yang paling penting untuk diperiksa adalah?", a: ["Status media sosial Anda", "Kondisi luka dan potensi bahaya lain (kebocoran gas, korsleting)", "Ketinggian air di bak mandi"], j: 1 },
+        { q: "Mengapa Anda harus menghindari lift saat gempa?", a: ["Terlalu lambat", "Berpotensi macet dan terputusnya listrik", "Untuk memberi kesempatan orang lain menggunakannya"], j: 1 },
+        { q: "Di daerah pesisir, setelah gempa kuat, apa yang harus Anda lakukan jika ada peringatan Tsunami?", a: ["Menunggu informasi lebih lanjut di pantai", "Segera evakuasi ke tempat yang lebih tinggi", "Berfoto untuk mendokumentasikan guncangan"], j: 1 },
+        { q: "Saat berkendara dan terjadi gempa, apa tindakan yang paling aman?", a: ["Tetap mengemudi secepat mungkin", "Hentikan kendaraan di tempat terbuka, jauh dari jembatan/pohon", "Keluar dari mobil dan lari"], j: 1 },
+        { q: "Di mana lokasi yang paling aman di dalam rumah saat terjadi gempa?", a: ["Di bawah balok pintu atau meja yang kuat", "Di dapur dekat kompor", "Di samping lemari pakaian tinggi"], j: 0 },
+        { q: "Apa yang harus Anda lakukan jika alarm kebakaran berbunyi saat gempa?", a: ["Mengabaikannya karena fokus pada gempa", "Tetap ikuti prosedur evakuasi, setelah guncangan berhenti", "Bersembunyi di kamar mandi"], j: 1 },
+        { q: "Setelah gempa, Anda mencium bau gas. Tindakan yang tepat adalah?", a: ["Nyalakan korek untuk mencari sumbernya", "Segera buka jendela, jangan nyalakan listrik atau api, dan laporkan", "Tetap tenang dan menunggu"], j: 1 },
+        { q: "Jika Anda berada di stadion/bioskop saat gempa, tindakan yang tepat adalah?", a: ["Lari panik menuju pintu keluar", "Tetap di kursi, lindungi kepala dan leher", "Melompat ke panggung"], j: 1 },
+    ],
+    // Diperluas menjadi 10 soal
+    banjir: [
+        { q: "Air mulai naik dengan cepat di rumah Anda. Tindakan darurat pertama yang harus dilakukan adalah?", a: ["Mencoba memompa air keluar", "Mematikan aliran listrik utama (MCB) dan sumber gas", "Menelepon teman untuk curhat"], j: 1 },
+        { q: "Anda harus mengungsi karena banjir. Barang yang *penting* untuk dibawa adalah?", a: ["Koleksi CD musik favorit", "Peralatan bertahan hidup (kit darurat), dokumen penting, dan obat-obatan", "Pakaian yang paling modis"], j: 1 },
+        { q: "Saat berjalan di air banjir, apa yang harus Anda waspadai?", a: ["Ikan yang berenang", "Arus yang deras, lubang/selokan terbuka, dan benda tajam", "Orang yang sedang berenang"], j: 1 },
+        { q: "Jika Anda terperangkap arus banjir deras di luar rumah, hal yang tidak boleh dilakukan adalah?", a: ["Mencari pegangan yang kuat", "Berusaha berenang melawan arus", "Mengapung mengikuti arus dengan posisi telentang"], j: 1 },
+        { q: "Mengapa dilarang mengonsumsi air banjir atau makanan yang terendam banjir?", a: ["Rasanya tidak enak", "Dapat terkontaminasi bakteri, kuman, dan bahan kimia berbahaya", "Membuat perut kenyang"], j: 1 },
+        { q: "Saat mengemudi dan bertemu genangan air tinggi, tindakan yang aman adalah?", a: ["Terobos dengan kecepatan tinggi", "Putar balik dan cari jalan alternatif", "Berhenti di tengah genangan"], j: 1 },
+        { q: "Mengapa penting untuk memiliki radio bertenaga baterai saat banjir?", a: ["Untuk mendengarkan musik santai", "Untuk menerima informasi dan peringatan terkini", "Sebagai alat penerangan"], j: 1 },
+        { q: "Setelah banjir surut, apa bahaya tersembunyi yang harus dihindari saat membersihkan rumah?", a: ["Lantai yang licin", "Sarang serangga/ular dan kerusakan struktural yang tidak terlihat", "Bau tidak sedap"], j: 1 },
+        { q: "Apa yang harus Anda lakukan dengan perabotan kayu yang terendam banjir?", a: ["Biarkan terendam sampai kering sendiri", "Bersihkan dan keringkan secepatnya untuk mencegah jamur", "Langsung buang"], j: 1 },
+        { q: "Saat evakuasi, mengapa tidak disarankan menggunakan perahu karet pribadi tanpa pelatihan khusus?", a: ["Membuang waktu", "Arus deras dapat membalikkan perahu dan membahayakan penyelamat", "Perahu karet cepat kempes"], j: 1 },
+    ],
+    // Diperluas menjadi 10 soal
+    kebakaran: [
+        { q: "Saat Anda melihat asap tebal akibat kebakaran, cara bernapas dan bergerak yang paling aman adalah?", a: ["Berlari tegak dan mengambil napas dalam-dalam", "Merunduk, merangkak di bawah asap, dan menutup hidung/mulut dengan kain basah", "Berteriak minta tolong sekencang-kencangnya"], j: 1 },
+        { q: "Saat pakaian Anda terbakar, tindakan yang harus dilakukan adalah?", a: ["Lari secepatnya", "Berhenti, Jatuh, dan Berguling-guling (Stop, Drop, and Roll)", "Tetap berdiri dan menepuk api"], j: 1 },
+        { q: "Jika Anda terjebak di ruangan berapi dan gagang pintu terasa panas saat disentuh, apa yang harus dilakukan?", a: ["Buka pintu secepatnya", "Cari jalan keluar lain, tutup celah pintu dengan kain, dan tunggu bantuan", "Mendorong pintu dengan bahu"], j: 1 },
+        { q: "Bahan pemadam api yang efektif untuk api kecil akibat kompor meledak (minyak/lemak) adalah?", a: ["Air yang banyak", "Selimut basah atau alat pemadam api ringan (APAR) dengan kategori yang sesuai", "Kipas angin"], j: 1 },
+        { q: "Di mana sebaiknya titik berkumpul (assembly point) keluarga ditetapkan setelah evakuasi kebakaran?", a: ["Di depan rumah tetangga yang sedang tidur", "Di tempat terbuka yang aman dan jauh dari bangunan terbakar", "Di dalam dapur"], j: 1 },
+        { q: "Apa nomor darurat yang harus dihubungi saat terjadi kebakaran besar?", a: ["Nomor telepon rumah teman", "Pemadam Kebakaran (biasanya 113 atau 112)", "Layanan pesan antar makanan"], j: 1 },
+        { q: "Ketika memadamkan api dengan APAR, arah semprotan yang benar adalah?", a: ["Langsung ke ujung lidah api", "Menyemprotkan secara merata ke seluruh ruangan", "Menyemprotkan ke dasar/sumber api"], j: 2 },
+        { q: "Setelah berhasil keluar dari gedung yang terbakar, apa yang tidak boleh Anda lakukan?", a: ["Membantu orang lain", "Masuk kembali ke gedung untuk mengambil barang", "Berdiri di titik kumpul"], j: 1 },
+        { q: "Penyebab utama kebakaran di rumah tangga seringkali adalah?", a: ["Komputer yang tidak dimatikan", "Hubungan arus pendek listrik (korsleting) atau kebocoran gas", "Televisi yang menyala"], j: 1 },
+        { q: "Jika Anda melihat api kecil di tempat sampah, yang pertama harus Anda lakukan adalah?", a: ["Diamkan saja", "Ambil air dan siram, atau gunakan APAR jika tersedia", "Panggil Pemadam Kebakaran segera"], j: 1 },
+    ],
+    // Diperluas menjadi 10 soal
+    angin: [
+        { q: "Jika Puting Beliung mendekat, di mana tempat berlindung yang paling aman?", a: ["Di dekat jendela besar", "Di dalam bangunan kokoh, ruang bawah tanah, atau bagian tengah rumah tanpa jendela", "Di bawah pohon tinggi"], j: 1 },
+        { q: "Saat berada di luar ruangan dan terjadi angin kencang/puting beliung, Anda harus menghindari?", a: ["Area terbuka", "Pohon besar, papan reklame, dan tiang listrik", "Trotoar"], j: 1 },
+        { q: "Persiapan yang harus dilakukan sebelum musim angin kencang adalah?", a: ["Mengencangkan atau memindahkan benda-benda yang mudah terbang", "Membuka semua jendela agar angin masuk", "Membiarkan genteng longgar"], j: 0 },
+        { q: "Setelah angin topan/puting beliung berlalu, hal pertama yang harus diwaspadai adalah?", a: ["Pemandangan yang indah", "Kabel listrik yang putus dan benda jatuh/runtuhan bangunan", "Genangan air"], j: 1 },
+        { q: "Saat di mobil dan melihat puting beliung, tindakan yang benar adalah?", a: ["Berhenti, tinggalkan mobil, dan masuk ke parit/area rendah", "Terus mengemudi untuk menjauh secepat mungkin", "Memotret puting beliung"], j: 0 },
+        { q: "Mengapa Anda harus menjauhi jendela saat terjadi angin kencang?", a: ["Jendela berisik", "Jendela bisa pecah akibat tekanan angin atau benda yang terlempar", "Agar tidak terlihat panik"], j: 1 },
+        { q: "Jika Anda tinggal di rumah panggung/kayu, saat badai yang disertai angin kencang, sebaiknya Anda?", a: ["Tinggal di tingkat atas", "Pindah ke struktur yang lebih kokoh di dekat lantai dasar", "Memasang layang-layang"], j: 1 },
+        { q: "Berapa lama biasanya puting beliung terjadi di satu lokasi?", a: ["Berhari-hari", "Biasanya hanya beberapa detik hingga beberapa menit", "Berjam-jam"], j: 1 },
+        { q: "Apa yang harus Anda lakukan jika Anda berada di kapal saat badai angin kencang?", a: ["Tetap di dek atas", "Segera cari pelabuhan terdekat atau tempat berlabuh yang aman", "Berlayar ke tengah laut"], j: 1 },
+        { q: "Mengapa memotong dahan pohon yang lapuk sebelum musim badai penting?", a: ["Agar terlihat rapi", "Untuk mengurangi risiko pohon/dahan tumbang menimpa rumah atau kabel listrik", "Untuk membuat pupuk"], j: 1 },
+    ],
+    // Diperluas menjadi 10 soal
+    longsor: [
+        { q: "Anda mendengar suara gemuruh atau melihat air keruh tiba-tiba di daerah lereng. Tindakan awal yang harus dilakukan?", a: ["Mendekat untuk mencari tahu sumber suara", "Segera evakuasi ke tempat yang aman dan tinggi", "Mengambil video"], j: 1 },
+        { q: "Salah satu tanda alam akan terjadi tanah longsor adalah?", a: ["Banyaknya bunga mekar", "Munculnya retakan tanah baru di lereng dan mata air baru", "Udara yang sangat panas"], j: 1 },
+        { q: "Apa yang harus dihindari saat berada di daerah rawan longsor saat hujan deras?", a: ["Tidur nyenyak tanpa alarm", "Tetap tinggal di dalam rumah atau struktur yang berada di jalur longsor", "Waspada"], j: 1 },
+        { q: "Jika Anda terjebak dalam longsoran dan terkubur dangkal, apa yang harus dilakukan?", a: ["Berusaha tetap tenang dan lindungi kepala, buat kantong udara di depan mulut", "Panik dan mencoba berteriak sekuat tenaga", "Tidur"], j: 0 },
+        { q: "Setelah longsor, sebelum kembali ke rumah, penting untuk memastikan?", a: ["Semua perabotan masih lengkap", "Kondisi struktural rumah aman dan tidak ada kebocoran gas/listrik", "Makanan di kulkas masih ada"], j: 1 },
+        { q: "Struktur bangunan apa yang paling rentan terhadap tanah longsor?", a: ["Bangunan di dataran rendah", "Bangunan yang dibangun di atas atau di bawah lereng curam", "Bangunan yang jauh dari bukit"], j: 1 },
+        { q: "Apa yang harus Anda lakukan jika melihat pipa air bocor di lereng bukit?", a: ["Mengabaikannya", "Segera laporkan karena dapat memicu longsor dengan melunakkan tanah", "Mengambil air untuk mandi"], j: 1 },
+        { q: "Di mana sebaiknya area yang dihindari saat terjadi tanah longsor?", a: ["Area terbuka", "Lembah, jalur aliran air, dan dasar lereng curam", "Puncak bukit"], j: 1 },
+        { q: "Pencegahan jangka panjang yang dapat dilakukan untuk mengurangi risiko longsor adalah?", a: ["Membangun kolam besar di puncak bukit", "Menanam pohon dengan sistem perakaran yang kuat di lereng", "Menggali lereng secara vertikal"], j: 1 },
+        { q: "Evakuasi saat longsor sebaiknya dilakukan dengan cara?", a: ["Berlari tegak lurus ke arah longsoran", "Bergerak cepat menjauhi jalur longsor ke tempat tinggi", "Menggunakan sepeda"], j: 1 },
+    ]
+};
+
+function loadQuestion() {
+    // Menghitung total pertanyaan di mode saat ini
+    const soal = bank[mode];
+    // Pastikan index tidak melebihi batas
+    if (index >= soal.length) return selesai(); 
+
+    let s = soal[index];
+
+    qText.innerText = Soal ${index + 1} dari ${soal.length}: ${s.q};
+    ansBtn.innerHTML = "";
+    
+    s.a.forEach((opsi, i) => {
+        let b = document.createElement("button");
+        b.className = "btn";
+        b.innerText = opsi;
+        b.onclick = () => jawab(i);
+        ansBtn.appendChild(b);
+    });
+}
+
+function jawab(i) {
+    if (i == bank[mode][index].j) benar++;
+
+    // Menonaktifkan semua tombol setelah dijawab
+    Array.from(ansBtn.children).forEach(btn => btn.disabled = true);
+    
+    // Menampilkan tombol selanjutnya
+    nextBtn.style.display = "block";
+}
+
+function nextQuestion() {
+    index++;
+    const total = bank[mode].length;
+
+    if (index >= total) return selesai();
+
+    nextBtn.style.display = "none";
+    loadQuestion();
+}
+
+function selesai() {
+    const total = bank[mode].length;
+    qText.innerHTML = `
+        <h2>🎉 Simulasi Selesai! 🎉</h2>
+        Mode: *${mode.toUpperCase()}*<br>
+        Skor Kamu: *${benar}* / ${total}<br><br>
+        <button class="btn" onclick="location.reload()">Kembali ke Menu</button>
+    `;
+    ansBtn.innerHTML = "";
+    nextBtn.style.display = "none";
+}
+</script>
