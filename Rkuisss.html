@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Web Edukasi Bencana</title>
+
+<style>
+    body {
+        background: #0a0f24;
+        color: white;
+        font-family: Arial, sans-serif;
+        text-align: center;
+        padding: 20px;
+    }
+
+    h1 {
+        font-size: 32px;
+        text-shadow: 0 0 10px #00eaff;
+    }
+
+    .menu {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+        gap: 15px;
+        margin-top: 30px;
+    }
+
+    .btn {
+        background: #111a3a;
+        padding: 15px;
+        border-radius: 12px;
+        border: 2px solid #00eaff;
+        cursor: pointer;
+        transition: 0.3s;
+    }
+
+    .btn:hover {
+        background: #00eaff;
+        color: black;
+    }
+
+    #quizBox {
+        display: none;
+        margin-top: 30px;
+        padding: 20px;
+        border: 2px solid #00eaff;
+        border-radius: 10px;
+    }
+
+    footer {
+        margin-top: 40px;
+        font-size: 14px;
+        opacity: 0.7;
+    }
+</style>
+</head>
+
+<body>
+
+<h1>Simulasi & Kuis Bencana Alam</h1>
+
+<div class="menu">
+    <div class="btn" onclick="startQuiz('gempa')">🌀 Gempa Bumi</div>
+    <div class="btn" onclick="startQuiz('banjir')">🌊 Banjir</div>
+    <div class="btn" onclick="startQuiz('angin')">🌪 Puting Beliung</div>
+    <div class="btn" onclick="startQuiz('longsor')">🏔 Tanah Longsor</div>
+    <div class="btn" onclick="startQuiz('kebakaran')">🔥 Kebakaran</div>
+</div>
+
+<div id="quizBox">
+    <h2 id="quizTitle"></h2>
+    <p id="questionText"></p>
+    <div id="options"></div>
+    <button onclick="nextQuestion()" class="btn" style="margin-top:20px;">Lanjut</button>
+    <p id="scoreText" style="margin-top:20px;"></p>
+</div>
+
+<footer>ROBI & ARTA | SMAN KABUH JOMBANG | 2025</footer>
+
+<script>
+/* ============================
+   BANK SOAL – 15 SOAL / BENCANA
+============================ */
+
+const questions = {
+    gempa: [
+        "Apa yang harus dilakukan saat gempa?", 
+        "Tempat paling aman saat gempa?", 
+        "Apa yang tidak boleh dilakukan?", 
+        "Saat gempa kamu harus berlindung di…",
+        "Jika sedang di sekolah dan terjadi gempa, kamu harus…",
+        "Saat gempa di luar ruangan sebaiknya…",
+        "Gempa disebabkan oleh…",
+        "Jika gempa kecil tapi lama disebut…",
+        "Setelah gempa kamu harus…",
+        "Apa tanda-tanda akan ada tsunami?",
+        "Saat getaran kuat kamu harus…",
+        "Jika berada dekat jendela saat gempa…",
+        "Saat gempa di mall kamu harus…",
+        "Apakah boleh memakai lift saat gempa?",
+        "Saat gempa di rumah tidur kamu harus…"
+    ],
+
+    banjir: [
+        "Apa penyebab banjir?", "Saat banjir harus menuju…", "Apa yang tidak boleh dilakukan?", 
+        "Saat banjir listrik harus…", "Cara mencegah banjir?", "Saat banjir besar kamu harus…",
+        "Benda penting dibawa saat banjir?", "Air banjir biasanya…", "Setelah banjir harus…",
+        "Saat evakuasi dilarang…", "Jika arus deras harus…", "Jika terjebak di rumah…",
+        "Banjir besar sering terjadi karena…", "Jika melihat orang hanyut…", "Saat banjir jangan berjalan di…"
+    ],
+
+    angin: [
+        "Puting beliung terjadi karena…", "Saat angin besar kamu harus…", "Rumah yang rawan roboh…",
+        "Jika berada di luar saat angin kencang…", "Apa tanda puting beliung?", "Warna langit biasanya…",
+        "Saat angin kencang hindari…", "Jika pohon tumbang…", "Jendela harus…",
+        "Saat mendengar suara kencang…", "Jika benda beterbangan…", "Saat berada di lapangan…",
+        "Setelah angin reda harus…", "Puting beliung biasanya muncul saat…", "Apa yang tidak boleh dilakukan?"
+    ],
+
+    longsor: [
+        "Tanda-tanda tanah longsor?", "Saat hujan deras sebaiknya…", "Rumah di tebing rawan…",
+        "Jika tanah retak kamu harus…", "Saat longsor kamu harus…", "Setelah longsor jangan…",
+        "Penyebab longsor?", "Saat mendengar suara retakan…", "Longsor terjadi terutama di…",
+        "Saat evakuasi kamu harus…", "Jika jalan tertutup…", "Jika hujan berhari-hari…",
+        "Longsor sering terjadi setelah…", "Jika rumah goyang…", "Cara mencegah longsor?"
+    ],
+
+    kebakaran: [
+        "Jika terjadi kebakaran kamu harus…", "Asap berbahaya karena…", "Memadamkan api kecil pakai…",
+        "Jika ruangan penuh asap kamu harus…", "Saat kebakaran jangan gunakan…", "Jika baju terbakar lakukan…",
+        "Penyebab kebakaran rumah?", "Jika mencium bau gas…", "Saat kebakaran sekolah kamu harus…",
+        "Saat api besar jangan…", "Jika terjebak di ruangan…", "Asap naik ke…",
+        "Cara menyelamatkan diri pertama?", "Jika alarm berbunyi kamu harus…", "Saat kebakaran lift harus…"
+    ]
+};
+<script>
+
+let currentDisaster = "";
+let currentIndex = 0;
+let score = 0;
+
+function startQuiz(type) {
+    currentDisaster = type;
+    currentIndex = 0;
+    score = 0;
+
+    document.getElementById("quizBox").style.display = "block";
+    document.getElementById("quizTitle").innerText =
+        "Kuis Bencana: " + type.toUpperCase();
+
+    loadQuestion();
+}
+
+function loadQuestion() {
+    const qList = questions[currentDisaster];
+    const question = qList[currentIndex];
+
+    document.getElementById("questionText").innerText =
+        (currentIndex + 1) + ". " + question;
+
+    let optionsHTML = "";
+
+    optionsHTML += <button class='btn' onclick='checkAnswer(true)'>Jawaban Benar</button>;
+    optionsHTML += <button class='btn' onclick='checkAnswer(false)'>Jawaban Salah</button>;
+
+    document.getElementById("options").innerHTML = optionsHTML;
+}
+
+function checkAnswer(isCorrect) {
+    if (isCorrect) score++;
+}
+
+function nextQuestion() {
+    currentIndex++;
+
+    if (currentIndex >= questions[currentDisaster].length) {
+        endQuiz();
+        return;
+    }
+
+    loadQuestion();
+}
+
+function endQuiz() {
+    let total = questions[currentDisaster].length;
+    let percent = Math.round((score / total) * 100);
+
+    document.getElementById("quizBox").innerHTML = `
+        <h2>🎉 Kuis Selesai!</h2>
+        <p>Benar: <b>${score}</b> dari ${total} soal</p>
+        <p>Persentase: <b>${percent}%</b></p>
+        <button class='btn' onclick='location.reload()'>Ulangi</button>
+    `;
+}
+
+</script>
+
+</body>
+</html>
